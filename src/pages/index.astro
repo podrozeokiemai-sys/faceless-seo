@@ -1,0 +1,46 @@
+---
+import Papa from 'papaparse';
+
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRTkrHS1BMQ8RSoUAyoqlBQjmV3eQpBqhaqw_c-2iXXNGv-aUZN_94zrtXJECrwKFBhqYiGgNrCg1lQ/pub?gid=860073749&single=true&output=csv';
+
+const response = await fetch(SHEET_CSV_URL);
+const csvText = await response.text();
+const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+const tools = parsed.data;
+---
+
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Porównywarka Narzędzi Wideo AI 2026</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+    <style>
+      body { padding: 2rem 0; }
+     .container { max-width: 800px; }
+     .tool-card { margin-bottom: 2rem; padding: 1.5rem; border: 1px solid #ccc; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Katalog Narzędzi Wideo AI (2026)</h1>
+      <p>Wybierz interesujące Cię oprogramowanie, aby przeczytać rzetelną recenzję i sprawdzić cennik.</p>
+      
+      <div class="tools-list">
+        {tools.map((tool) => (
+          <article class="tool-card">
+            <header>
+              <h3>{tool.Nazwa_Narzędzia}</h3>
+              <mark>{tool.Kategoria}</mark>
+            </header>
+            <p><strong>Cena minimalna:</strong> {tool.Cena_Min}</p>
+            <p>{tool.Główna_Zaleta_Niszy? tool.Główna_Zaleta_Niszy.substring(0, 150) + "..." : ""}</p>
+            <footer>
+              <a href={`/${tool.ID.toLowerCase()}`} class="button">Przejdź do recenzji &rarr;</a>
+            </footer>
+          </article>
+        ))}
+      </div>
+    </main>
+  </body>
+</html>
