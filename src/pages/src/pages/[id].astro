@@ -1,0 +1,109 @@
+---
+import Papa from 'papaparse';
+
+export async function getStaticPaths() {
+  const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRTkrHS1BMQ8RSoUAyoqlBQjmV3eQpBqhaqw_c-2iXXNGv-aUZN_94zrtXJECrwKFBhqYiGgNrCg1lQ/pub?gid=860073749&single=true&output=csv';
+  const response = await fetch(SHEET_CSV_URL);
+  const csvText = await response.text();
+  const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+  
+  return parsed.data.map((row) => ({
+    params: { id: row.ID.toLowerCase() },
+    props: { tool: row }
+  }));
+}
+
+const { tool } = Astro.props;
+
+// JSON-LD Schema (Zabezpieczenie SEO i wskaźnik jakości Qs)
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": tool.Nazwa_Narzędzia,
+  "description": tool.Meta_Description,
+  "offers": {
+    "@type": "Offer",
+    "price": tool.Cena_Min? tool.Cena_Min.replace(/[^0-9.]/g, '') : "0",
+    "priceCurrency": "USD"
+  }
+};
+---
+
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tool.Meta_Title}</title>
+    <meta name="description" content={tool.Meta_Description} />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <style>
+      body { padding: 2rem 0; }
+     .container { max-width: 800px; }
+     .wada { color: #d32f2f; }
+     .zaleta { color: #388e3c; }
+     .cta-box { text-align: center; margin: 3rem 0; padding: 2rem; background: #f9f9f9; border-radius: 8px; border: 2px dashed #0076ff; }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <nav aria-label="breadcrumb">
+        <ul>
+          <li><a href="/">Strona główna</a></li>
+          <li>{tool.Nazwa_Narzędzia}</li>
+        </ul>
+      </nav>
+
+      <h1 class="text-center">{tool.Nazwa_Narzędzia} – Recenzja, Opinie i Cennik (2026)</h1>
+      <p class="text-center"><mark>{tool.Kategoria}</mark></p>
+
+      <hr />
+
+      <section>
+        <h2>Główna Zaleta</h2>
+        <p class="zaleta"><strong>✓ {tool.Główna_Zaleta_Niszy}</strong></p>
+      </section>
+
+      <section>
+        <h2>Największa Wada</h2>
+        <p class="wada"><strong>✗ {tool.Największa_Wada}</strong></p>
+      </section>
+
+      <section>
+        <h2>Kluczowe Funkcje</h2>
+        <ul>
+          <li><strong>{tool.Unikalna_Funkcja_1}</strong></li>
+          <li><strong>{tool.Unikalna_Funkcja_2}</strong></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Specyfikacja Techniczna</h2>
+        <table>
+          <tbody>
+            <tr>
+              <td><strong>Cena minimalna:</strong></td>
+              <td>{tool.Cena_Min}</td>
+            </tr>
+            <tr>
+              <td><strong>Szybkość Generowania:</strong></td>
+              <td>{tool.Szybkość_Generowania}</td>
+            </tr>
+            <tr>
+              <td><strong>Grupa Docelowa:</strong></td>
+              <td>{tool.Grupa_Docelowa}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="cta-box">
+        <h3>Chcesz wypróbować {tool.Nazwa_Narzędzia}?</h3>
+        <p>Kliknij poniższy przycisk, aby przejść bezpośrednio do oficjalnej strony i skorzystać z najlepszej oferty.</p>
+        <a href={tool.Link_Afiliacyjny} target="_blank" rel="noopener noreferrer" class="button">
+          Wypróbuj {tool.Nazwa_Narzędzia} teraz &rarr;
+        </a>
+      </div>
+    </main>
+  </body>
+</html>
